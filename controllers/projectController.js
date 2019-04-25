@@ -1,6 +1,7 @@
 'use strict'
 
 var Project = require('../models/project');
+var fs = require('fs');
 
 var controller = {
 
@@ -89,6 +90,41 @@ var controller = {
 
 		});
 
+	},
+
+	//metodo para subir archivos
+	uploadImage:function(req, res){
+
+		var projectId = req.params.id;
+		var fileName = 'Imagen no subida...';
+
+		if(req.files){
+
+			var filePath = req.files.image.path;
+			var fileSplit = filePath.split('\\');
+			var fileName = fileSplit[1];
+			var exSplit = fileName.split('\.');
+			var fileExt = exSplit[1];
+
+			if(fileExt == 'jpeg' || fileExt == 'jpg' || fileExt == 'gif' || fileExt == 'png') {
+
+				Project.findByIdAndUpdate(projectId, {image: fileName}, {new:true}, (err, projectUpdate)=>{
+					
+					if(err) return res.status(500).send({message :'Error al subir archivo'});
+
+					if(!projectUpdate) return res.status(404).send({message: 'No existe proyecto'});
+
+					return res.status(200).send({files: fileName});
+				});
+			}else{
+
+				fs.unlink(filePath, (err)=>{
+					return res.status(200).send({message: 'No se admite este tipo de archivo'});
+				});
+
+			}
+
+		}
 	}
 
 };
