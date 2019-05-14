@@ -2,6 +2,7 @@
 
 var Project = require('../models/project');
 var fs = require('fs');
+var path = require('path');
 
 var controller = {
 
@@ -56,6 +57,22 @@ var controller = {
 			return res.status(200).send({projects});
 
 		});
+	},
+
+	getProject: function(req, res){
+
+		var projectId= req.params.id;
+
+		Project.findById(projectId, (err, project) => {
+
+			if(err) return res.status(500).send({message:'Erro al devolver datos'});
+
+			if(!project) return res.status(404).send({message:'No existe el proyecto a consultar'});
+
+			return res.status(200).send({project: project});
+
+		});
+		
 	},
 
 	//metodo para actualizar un proyecto
@@ -125,6 +142,23 @@ var controller = {
 			}
 
 		}
+	},
+
+	getImageFile: function(req, res){
+
+		var file = req.params.image;
+		var path_file = './uploads/'+file;
+
+		fs.exists(path_file, (exists) => {
+			if(exists){
+				return res.sendFile(path.resolve(path_file));
+			}else{
+				return res.status(200).send({
+					massage: 'No existe la imagen'
+				});
+			}
+		})
+
 	}
 
 };
